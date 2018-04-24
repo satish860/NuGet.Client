@@ -326,6 +326,7 @@ phases:
 
 - phase: Functional_Tests_On_Windows
   dependsOn: Initialize_Build
+  condition: "and(succeeded(),eq(variables['RunFunctionalTestsOnWindows'], 'true')) "  	
   queue:
     name: VSEng-MicroBuildSxS
     timeoutInMinutes: 120
@@ -400,6 +401,7 @@ phases:
 
 - phase: Tests_On_Linux
   dependsOn: Initialize_Build
+  condition: "and(succeeded(),eq(variables['RunTestsOnLinux'], 'true')) "  	
   queue:
     name: DDNuGet-Linux
     timeoutInMinutes: 45
@@ -436,7 +438,7 @@ phases:
 
 - phase: Tests_On_Mac
   dependsOn: Build_and_UnitTest
-  condition: "succeeded()"
+  condition: "and(succeeded(),eq(variables['RunTestsOnMac'], 'true')) "  	
   queue:
     name: VSEng-MicroBuildMacSierra
     timeoutInMinutes: 60
@@ -492,7 +494,7 @@ phases:
   dependsOn: Build_and_UnitTest
   variables:
     BuildNumber: $[dependencies.Build_and_UnitTest.outputs['RTM.configuration.BuildNumber']]
-  condition: "succeeded()"
+  condition: "and(succeeded(),eq(variables['RunEndToEndTests'], 'true')) "  	
   queue:
     name: DDNuGet-Windows
     timeoutInMinutes: 75
