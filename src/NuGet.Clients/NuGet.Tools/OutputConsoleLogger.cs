@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.Shell;
 using NuGet.Common;
 using NuGet.PackageManagement.VisualStudio;
 using NuGet.ProjectManagement;
+using NuGet.SolutionRestoreManager;
 using NuGet.VisualStudio;
 using NuGetConsole;
 
@@ -36,11 +37,14 @@ namespace NuGetVSExtension
 
         public ErrorListProvider ErrorListProvider { get; private set; }
 
+        public ErrorListTableDataSource ErrorListTableDataSource { get; private set; }
+
         [ImportingConstructor]
         public OutputConsoleLogger(
             [Import(typeof(SVsServiceProvider))]
             IServiceProvider serviceProvider,
-            IOutputConsoleProvider consoleProvider)
+            IOutputConsoleProvider consoleProvider,
+            ErrorListTableDataSource errorListTableDataSource)
         {
             if (serviceProvider == null)
             {
@@ -77,6 +81,8 @@ namespace NuGetVSExtension
                 await NuGetUIThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
                 ErrorListProvider.Dispose();
+
+                ErrorListTableDataSource.ClearNuGetEntries();
             });
         }
 
@@ -149,7 +155,14 @@ namespace NuGetVSExtension
                 Priority = TaskPriority.High,
                 HierarchyItem = null
             };
+
             RunTaskOnUI(() => ErrorListProvider.Tasks.Add(errorTask));
+        }
+
+        public void ReportError(ILogMessage message)
+        {
+            var errorListEntry = new ErrorListTableEntry(message);
+            RunTaskOnUI(() => ErrorListTableDataSource.AddNuGetEntries(new ErrorListTableEntry[] { errorListEntry }));
         }
 
         private static void RunTaskOnUI(Action action)
