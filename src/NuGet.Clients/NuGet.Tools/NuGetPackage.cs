@@ -826,9 +826,14 @@ namespace NuGetVSExtension
 
                 var command = (OleMenuCommand)sender;
                 
-
+                var isConsoleBusy = false;
+                if (ConsoleStatus != null)
+                {
+                    isConsoleBusy = ConsoleStatus.Value.IsBusy;
+                }
+                
                 command.Visible = IsSolutionOpen && await IsProjectUpgradeableAsync();
-                command.Enabled = !ConsoleStatus.Value.IsBusy && IsSolutionExistsAndNotDebuggingAndNotBuilding() && HasActiveLoadedSupportedProject;
+                command.Enabled = isConsoleBusy && IsSolutionExistsAndNotDebuggingAndNotBuilding() && HasActiveLoadedSupportedProject;
             });
         }
 
