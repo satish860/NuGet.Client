@@ -102,14 +102,7 @@ namespace NuGet.VisualStudio
             }
 
             // invoke async operation from within synchronous method
-            outputPathContext = NuGetUIThreadHelper.JoinableTaskFactory.Run(
-                async () =>
-                {
-                    var result = await CreateProjectAdapterAsync(projectUniqueName);
-
-                    return result == null ? null
-                        : await CreatePathContextAsync(result.Item1, result.Item2, projectUniqueName, CancellationToken.None);
-                });
+            outputPathContext = GetSolutionPathContext();
 
             return outputPathContext != null;
         }
